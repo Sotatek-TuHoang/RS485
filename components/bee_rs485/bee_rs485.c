@@ -67,6 +67,7 @@ void TX(const int port, const char* str, uint8_t length)
         // add your code to handle sending failure here
         abort();
     }
+    //free(new_tx_str);
 }
 
 void RX_task(void *pvParameters)
@@ -137,6 +138,11 @@ static char* tx_str_example(uint8_t address_slave, uint8_t function, uint8_t typ
 
     // Sao chép chuỗi tx_str vào một vùng nhớ mới.
     char* new_tx_str = malloc(sizeof(tx_str) + 1);
+    if (new_tx_str == NULL)
+    {
+        return NULL;
+    }
+
     memcpy(new_tx_str, tx_str, sizeof(tx_str) + 1);
 
     return new_tx_str;
