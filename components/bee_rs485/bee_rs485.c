@@ -92,11 +92,54 @@ void RX_task(void *pvParameters)
     }
 }
 
-void TX_handshaking(uint8_t add)
+static uint8_t calculate_crc(const uint8_t* data, uint8_t data_len)
 {
-    char str[] = {0x55, add, 0x00, 0x00, 0x02};
-    uint8_t len = strlen(str);
-    TX(UART_PORT_2, str, len);
+    uint16_t current_byte;
+    uint8_t crc = 0xFF;
+    uint8_t crc_bit;
+
+    for(current_byte = 0; current_byte < data_len; ++current_byte)
+    {
+        crc ^= (data[current_byte]);
+        for(crc_bit = 8; crc_bit > 0; --crc_bit)
+        {
+            if (crc & 0x80)
+            {
+                crc = (crc << 1) ^ CRC8_POLYNOMIAL;
+            }
+            else
+            {
+                crc = (crc << 1);
+            }
+        }
+    }
+    return crc;
+}
+
+static char* tx_str_example(uint8_t address_slave, uint8_t function, uint8_t type_data)
+{
+    uint8_t tx_str[5];
+    tx_str[0] = 0x55;
+    tx_str[1] = address_slave;
+    tx_str[2] = function;
+    tx_str[3] = type_data;
+
+    uint8_t low_byte_data = 0x10;
+    uint8_t high_byte_data = 0x20;
+    tx_str[4] = low_byte_data;
+    tx_str[5] = high_byte_data;
+
+    // Tính CRC của chuỗi tx_str.
+    uint8_t crc = calculate_crc(tx_str, sizeof(tx_str));
+
+    // Thêm CRC vào chuỗi tx_str.
+    tx_str[6] = crc;
+
+    // Sao chép chuỗi tx_str vào một vùng nhớ mới.
+    char* new_tx_str = malloc(sizeof(tx_str) + 1);
+    memcpy(new_tx_str, tx_str, sizeof(tx_str) + 1);
+
+    return new_tx_str;
 }
 
 /****************************************************************************/
