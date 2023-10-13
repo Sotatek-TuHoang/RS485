@@ -40,6 +40,7 @@
 
 void RX_task(void *pvParameters);
 void TX(const int port, const char* str, uint8_t length);
+char* tx_str_example(uint8_t address_slave, uint8_t function, uint8_t type_data);
 
 #endif
 

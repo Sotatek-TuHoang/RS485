@@ -117,7 +117,31 @@ static uint8_t calculate_crc(const uint8_t* data, uint8_t data_len)
     return crc;
 }
 
-static char* tx_str_example(uint8_t address_slave, uint8_t function, uint8_t type_data)
+uint8_t *split_float_to_bytes(float data)
+{
+  // Chuyển đổi dữ data từ kiểu float sang kiểu uint16_t.
+  uint16_t data_uint16 = (uint16_t)data;
+
+  // Kiểm tra giá trị dấu của data.
+  int sign = data < 0;
+
+  // Nếu giá trị dấu là 1, thì thêm 256 vào giá trị byte cao nhất của data.
+  if (sign)
+  {
+    data_uint16 += 256;
+  }
+
+  // Lưu giá trị byte thấp nhất của data vào biến low_byte.
+  uint8_t low_byte = (uint8_t)(data_uint16 & 0xFF);
+
+  // Lưu giá trị byte cao nhất của data vào biến high_byte.
+  uint8_t high_byte = (uint8_t)((data_uint16 >> 8) & 0xFF);
+
+  // Trả về kết quả.
+  return (uint8_t[]){high_byte, low_byte};
+}
+
+char *tx_str_example(uint8_t address_slave, uint8_t function, uint8_t type_data)
 {
     uint8_t tx_str[5];
     tx_str[0] = 0x55;
@@ -138,7 +162,7 @@ static char* tx_str_example(uint8_t address_slave, uint8_t function, uint8_t typ
 
     // Sao chép chuỗi tx_str vào một vùng nhớ mới.
     char* new_tx_str = malloc(sizeof(tx_str) + 1);
-    
+
     memcpy(new_tx_str, tx_str, sizeof(tx_str) + 1);
 
     return new_tx_str;
