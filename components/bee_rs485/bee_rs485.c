@@ -93,54 +93,6 @@ void RX_task(void *pvParameters)
     }
 }
 
-static uint8_t calculate_crc(const uint8_t* data, uint8_t data_len)
-{
-    uint16_t current_byte;
-    uint8_t crc = 0xFF;
-    uint8_t crc_bit;
-
-    for(current_byte = 0; current_byte < data_len; ++current_byte)
-    {
-        crc ^= (data[current_byte]);
-        for(crc_bit = 8; crc_bit > 0; --crc_bit)
-        {
-            if (crc & 0x80)
-            {
-                crc = (crc << 1) ^ CRC8_POLYNOMIAL;
-            }
-            else
-            {
-                crc = (crc << 1);
-            }
-        }
-    }
-    return crc;
-}
-
-uint8_t *split_float_to_bytes(float data)
-{
-  // Chuyển đổi dữ data từ kiểu float sang kiểu uint16_t.
-  uint16_t data_uint16 = (uint16_t)data;
-
-  // Kiểm tra giá trị dấu của data.
-  int sign = data < 0;
-
-  // Nếu giá trị dấu là 1, thì thêm 256 vào giá trị byte cao nhất của data.
-  if (sign)
-  {
-    data_uint16 += 256;
-  }
-
-  // Lưu giá trị byte thấp nhất của data vào biến low_byte.
-  uint8_t low_byte = (uint8_t)(data_uint16 & 0xFF);
-
-  // Lưu giá trị byte cao nhất của data vào biến high_byte.
-  uint8_t high_byte = (uint8_t)((data_uint16 >> 8) & 0xFF);
-
-  // Trả về kết quả.
-  return (uint8_t[]){high_byte, low_byte};
-}
-
 char *tx_str_example(uint8_t address_slave, uint8_t function, uint8_t type_data)
 {
     uint8_t tx_str[5];
@@ -166,6 +118,56 @@ char *tx_str_example(uint8_t address_slave, uint8_t function, uint8_t type_data)
     memcpy(new_tx_str, tx_str, sizeof(tx_str) + 1);
 
     return new_tx_str;
+}
+
+static uint8_t calculate_crc(const uint8_t* data, uint8_t data_len)
+{
+    uint16_t current_byte;
+    uint8_t crc = 0xFF;
+    uint8_t crc_bit;
+
+    for(current_byte = 0; current_byte < data_len; ++current_byte)
+    {
+        crc ^= (data[current_byte]);
+        for(crc_bit = 8; crc_bit > 0; --crc_bit)
+        {
+            if (crc & 0x80)
+            {
+                crc = (crc << 1) ^ CRC8_POLYNOMIAL;
+            }
+            else
+            {
+                crc = (crc << 1);
+            }
+        }
+    }
+    return crc;
+}
+
+// Hàm chuyển đổi từ float sang 2 byte cao và thấp
+void floatToBytes(float floatValue, unsigned char *byteArray)
+{
+    // Sử dụng con trỏ để truy cập từng byte của giá trị float
+    unsigned char *floatBytes = (unsigned char *)&floatValue;
+
+    // Gán giá trị byte cao và byte thấp
+    byteArray[0] = floatBytes[3];
+    byteArray[1] = floatBytes[2];
+}
+
+// Hàm chuyển đổi từ 2 byte sang float
+float bytesToFloat(const unsigned char *byteArray)
+{
+    float result;
+
+    // Tạo một con trỏ để truy cập từng byte của giá trị float
+    unsigned char *floatBytes = (unsigned char *)&result;
+
+    // Gán giá trị byte cao và byte thấp
+    floatBytes[3] = byteArray[0];
+    floatBytes[2] = byteArray[1];
+
+    return result;
 }
 
 /****************************************************************************/
