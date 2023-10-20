@@ -24,10 +24,11 @@
 
 static QueueHandle_t uart_queue;
 
-void rs485_init(void *arg)
+void rs485_init()
 {
     const int uart_num = UART_PORT_2;
-    uart_config_t uart_config = {
+    uart_config_t uart_config =
+    {
         .baud_rate = BAUD_RATE,
         .data_bits = UART_DATA_8_BITS,
         .parity = UART_PARITY_DISABLE,
@@ -95,7 +96,7 @@ void RX_task(void *pvParameters)
 
 char *tx_str_example(uint8_t address_slave, uint8_t function, uint8_t type_data)
 {
-    uint8_t tx_str[5];
+    uint8_t tx_str[6];
     tx_str[0] = 0x55;
     tx_str[1] = address_slave;
     tx_str[2] = function;
@@ -115,12 +116,12 @@ char *tx_str_example(uint8_t address_slave, uint8_t function, uint8_t type_data)
     // Sao chép chuỗi tx_str vào một vùng nhớ mới.
     char* new_tx_str = malloc(sizeof(tx_str) + 1);
 
-    memcpy(new_tx_str, tx_str, sizeof(tx_str) + 1);
+    memcpy(new_tx_str, tx_str, sizeof(tx_str) );
 
     return new_tx_str;
 }
 
-static uint8_t calculate_crc(const uint8_t* data, uint8_t data_len)
+uint8_t calculate_crc(const uint8_t* data, uint8_t data_len)
 {
     uint16_t current_byte;
     uint8_t crc = 0xFF;

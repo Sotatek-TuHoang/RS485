@@ -19,12 +19,12 @@
 // CTS is not used in RS485 Half-Duplex Mode
 #define CTS_PIN   (UART_PIN_NO_CHANGE)
 
-#define BUF_SIZE        (2048)
+#define BUF_SIZE        (4096)
 #define BAUD_RATE       (115200)
 
 // Read packet timeout
 #define PACKET_READ_TICS     (100 / portTICK_PERIOD_MS)
-#define RX_TASK_STACK_SIZE   (2048)
+#define RX_TASK_STACK_SIZE   (4096)
 #define RX_TASK_PRIO         (10)
 #define UART_PORT_2          (2)
 
@@ -36,6 +36,10 @@
 #define ADDRESS_SLAVE_1 0X01
 #define ADDRESS_SLAVE_2 0X02
 #define ADDRESS_SLAVE_3 0X03
+
+void rs485_init();
+
+uint8_t calculate_crc(const uint8_t* data, uint8_t data_len);
 
 void RX_task(void *pvParameters);
 
