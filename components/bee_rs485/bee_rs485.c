@@ -108,10 +108,11 @@ char *tx_str_example(uint8_t address_slave, uint8_t function, uint8_t type_data)
     tx_str[5] = high_byte_data;
 
     // Tính CRC của chuỗi tx_str.
-    uint8_t crc = calculate_crc(tx_str, sizeof(tx_str));
+    uint16_t crc = cal_crc16(tx_str, sizeof(tx_str));
 
     // Thêm CRC vào chuỗi tx_str.
-    tx_str[6] = crc;
+    tx_str[6] = crc & 0xFF;       // Byte thấp của CRC
+    tx_str[7] = (crc >> 8) & 0xFF;  // Byte cao của CRC
 
     // Sao chép chuỗi tx_str vào một vùng nhớ mới.
     char* new_tx_str = malloc(sizeof(tx_str) + 1);
@@ -121,28 +122,42 @@ char *tx_str_example(uint8_t address_slave, uint8_t function, uint8_t type_data)
     return new_tx_str;
 }
 
-uint8_t calculate_crc(const uint8_t* data, uint8_t data_len)
+bool check_crc(const uint8_t* data, size_t len)
 {
-    uint16_t current_byte;
-    uint8_t crc = 0xFF;
-    uint8_t crc_bit;
-
-    for(current_byte = 0; current_byte < data_len; ++current_byte)
+    if (len < 2)
     {
-        crc ^= (data[current_byte]);
-        for(crc_bit = 8; crc_bit > 0; --crc_bit)
-        {
-            if (crc & 0x80)
-            {
-                crc = (crc << 1) ^ CRC8_POLYNOMIAL;
-            }
-            else
-            {
-                crc = (crc << 1);
-            }
-        }
+        // Ít nhất cần 2 byte để kiểm tra CRC.
+        return false;
     }
-    return crc;
+
+    // Tính toán CRC từ dữ liệu nhận được, trừ 2 byte CRC cuối cùng.
+    uint16_t received_crc = cal_crc16(data, len - 2);
+
+    // So sánh với CRC được gửi trong chuỗi nhận được (2 byte cuối cùng).
+    uint16_t expected_crc = (data[len - 2] | (data[len - 1] << 8));
+
+    return received_crc == expected_crc;
+}
+
+uint16_t cal_crc16(const uint8_t *data, size_t len)
+{
+  uint16_t crc = 0xffff;
+  for (size_t i = 0; i < len; i++)
+  {
+    crc = crc ^ data[i];
+    for (int j = 0; j < 8; j++)
+    {
+      if ((crc & 1) == 0)
+      {
+        crc >>= 1;
+      }
+      else
+      {
+        crc = (crc >> 1) ^ 0xa001;
+      }
+    }
+  }
+  return crc;
 }
 
 // Hàm chuyển đổi từ float sang 2 byte cao và thấp

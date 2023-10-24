@@ -39,7 +39,9 @@
 
 void rs485_init();
 
-uint8_t calculate_crc(const uint8_t* data, uint8_t data_len);
+bool check_crc(const uint8_t* data, size_t len);
+
+uint16_t cal_crc16(const uint8_t* data, size_t len);
 
 void RX_task(void *pvParameters);
 
