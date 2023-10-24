@@ -87,7 +87,7 @@ void RX_task(void *pvParameters)
 
             // add your code to handle RX events
 
-            free(dtmp);
+            //free(dtmp);
             dtmp = NULL;
         }
         vTaskDelay(pdMS_TO_TICKS(100));
