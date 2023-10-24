@@ -116,7 +116,7 @@ char *tx_str_example(uint8_t address_slave, uint8_t function, uint8_t type_data)
     // Sao chép chuỗi tx_str vào một vùng nhớ mới.
     char* new_tx_str = malloc(sizeof(tx_str) + 1);
 
-    memcpy(new_tx_str, tx_str, sizeof(tx_str) );
+    memcpy(new_tx_str, tx_str, sizeof(tx_str));
 
     return new_tx_str;
 }
