@@ -10,8 +10,8 @@
 #ifndef BEE_RS485
 #define BEE_RS485
 
-#define TX_PIN   (16)
-#define RX_PIN   (17)
+#define TX_PIN   (17)
+#define RX_PIN   (16)
 
 // RTS for RS485 Half-Duplex Mode manages DE/~RE
 #define RTS_PIN   (18)
@@ -20,7 +20,7 @@
 #define CTS_PIN   (UART_PIN_NO_CHANGE)
 
 #define BUF_SIZE        (4096)
-#define BAUD_RATE       (115200)
+#define BAUD_RATE       (9600)
 
 // Read packet timeout
 #define PACKET_READ_TICS     (100 / portTICK_PERIOD_MS)

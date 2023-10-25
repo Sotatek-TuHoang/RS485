@@ -85,10 +85,15 @@ void RX_task(void *pvParameters)
             ESP_LOGI(TAG, "[UART DATA]: %d", event.size);
             uart_read_bytes(UART_PORT_2, dtmp, event.size, portMAX_DELAY);
 
-            // add your code to handle RX events
+            printf("str RX: ");
+            
+            // In chuỗi nhận được theo dạng hexa
+            for (int i = 0; i < event.size; i++)
+            {
+                printf("%02X ", dtmp[i]);
+            }
+            printf("\n");
 
-            //free(dtmp);
-            dtmp = NULL;
         }
         vTaskDelay(pdMS_TO_TICKS(100));
     }
@@ -103,7 +108,7 @@ char* read_holding_registers(uint8_t slave_addr)
     tx_str[2] = 0x5b;
     tx_str[3] = 0x00;
     tx_str[4] = 0x00;
-    tx_str[5] = 0x02;
+    tx_str[5] = 0x33;
 
     // Tính CRC của chuỗi tx_str.
     uint16_t crc = MODBUS_CRC16(tx_str, 6);

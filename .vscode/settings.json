@@ -7,6 +7,10 @@
     "uart.h": "c",
     "esp_system.h": "c",
     "stdbool.h": "c",
-    "functional": "c"
+    "functional": "c",
+    "queue.h": "c",
+    "string_view": "c",
+    "regex": "c",
+    "sstream": "c"
   }
 }
