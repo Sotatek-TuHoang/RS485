@@ -39,19 +39,13 @@
 
 void rs485_init();
 
-bool check_crc(const uint8_t* data, size_t len);
-
-uint16_t cal_crc16(const uint8_t* data, size_t len);
+uint16_t MODBUS_CRC16( const unsigned char *buf, unsigned int len );
 
 void RX_task(void *pvParameters);
 
 void TX(const int port, const char* str, uint8_t length);
 
-char* tx_str_example(uint8_t address_slave, uint8_t function, uint8_t type_data);
-
-void floatToBytes(float floatValue, unsigned char *byteArray);
-
-float bytesToFloat(const unsigned char *byteArray);
+char* read_holding_registers(uint8_t slave_addr);
 
 
 #endif

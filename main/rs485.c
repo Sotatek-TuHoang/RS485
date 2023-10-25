@@ -8,10 +8,23 @@
 #include "freertos/queue.h"
 
 #include "bee_rs485.h"
+#include "esp_system.h"
 
 void app_main(void)
 {
     rs485_init();
 
     xTaskCreate(RX_task, "RX_task", RX_TASK_STACK_SIZE, NULL, RX_TASK_PRIO, NULL);
+
+    char* str = read_holding_registers(0x01);
+    if (str != NULL) {
+        printf("str: ");
+        for (int i = 0; i < 8; i++) {
+            printf("%02X ", (unsigned char)str[i]);
+        }
+        printf("\n");
+        free(str);
+    } else {
+        // Xử lý lỗi nếu không thể cấp phát bộ nhớ.
+    }
 }
