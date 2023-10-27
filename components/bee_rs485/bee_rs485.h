@@ -37,9 +37,42 @@
 #define ADDRESS_SLAVE_2 0X02
 #define ADDRESS_SLAVE_3 0X03
 
-void rs485_init();
+typedef struct
+{
+    uint32_t voltage3pha;
+    uint32_t voltageL1;
+    uint32_t voltageL2;
+    uint32_t voltageL3;
 
-uint16_t MODBUS_CRC16( uint8_t *buf, uint16_t len );
+    uint32_t voltageL1L2;
+    uint32_t voltageL3L2;
+    uint32_t voltageL3L1;
+
+    uint32_t current3pha;
+    uint32_t currentL1;
+    uint32_t currentL2;
+    uint32_t currentL3;
+    uint32_t currentN;
+
+    uint32_t actpower3pha;
+    uint32_t actpowerL1;
+    uint32_t actpowerL2;
+    uint32_t actpowerL3;
+
+    uint32_t ractpower3pha;
+    uint32_t ractpowerL1;
+    uint32_t ractpowerL2;
+    uint32_t ractpowerL3;
+
+    uint32_t aprtpower3pha;
+    uint32_t aprtpowerL1;
+    uint32_t aprtpowerL2;
+    uint32_t aprtpowerL3;
+    
+    uint16_t Frequency;
+} data_3pha_t;
+
+void rs485_init();
 
 void RX_task(void *pvParameters);
 

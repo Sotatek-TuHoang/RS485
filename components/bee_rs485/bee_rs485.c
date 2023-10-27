@@ -24,130 +24,17 @@
 
 static QueueHandle_t uart_queue;
 
-uint16_t combine_Bytes(uint8_t highByte, uint8_t lowByte)
+static uint16_t combine_2Bytes(uint8_t highByte, uint8_t lowByte)
 {
     return ((uint16_t)highByte << 8) | lowByte;
 }
 
-void rs485_init()
+static uint32_t combine_4Bytes(uint8_t highByte1, uint8_t lowByte1, uint8_t highByte2, uint8_t lowByte2)
 {
-    const int uart_num = UART_PORT_2;
-    uart_config_t uart_config =
-    {
-        .baud_rate = BAUD_RATE,
-        .data_bits = UART_DATA_8_BITS,
-        .parity = UART_PARITY_DISABLE,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-        .rx_flow_ctrl_thresh = 122,
-        .source_clk = UART_SCLK_DEFAULT,
-    };
-
-    // Set UART log level
-    esp_log_level_set(TAG, ESP_LOG_INFO);
-
-    ESP_LOGI(TAG, "Start RS485 application and configure UART.");
-
-    ESP_ERROR_CHECK(uart_driver_install(uart_num, BUF_SIZE * 2, 0, 10, &uart_queue, 0));
-
-    // Configure UART parameters
-    ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
-
-    ESP_LOGI(TAG, "UART set pins, mode and install driver.");
-
-    // Set UART pins
-    ESP_ERROR_CHECK(uart_set_pin(uart_num, TX_PIN, RX_PIN, RTS_PIN, CTS_PIN));
-
-    // Set RS485 half duplex mode
-    ESP_ERROR_CHECK(uart_set_mode(uart_num, UART_MODE_RS485_HALF_DUPLEX));
-
-    // Set read timeout of UART TOUT feature
-    ESP_ERROR_CHECK(uart_set_rx_timeout(uart_num, RX_READ_TOUT));
+    return ((uint32_t)highByte1 << 24) | (lowByte1 << 16) | (highByte2 << 8) | lowByte2;
 }
 
-void TX(const int port, const char* str, uint8_t length)
-{
-    if (uart_write_bytes(port, str, length) != length)
-    {
-        ESP_LOGE(TAG, "Send data critical failure.");
-        // add your code to handle sending failure here
-        abort();
-    }
-}
-
-void RX_task(void *pvParameters)
-{
-    uart_event_t event;
-    uint8_t* dtmp = (uint8_t*) malloc(BUF_SIZE);
-    for(;;)
-    {
-        // Waiting for UART event.
-        if(xQueueReceive(uart_queue, (void * )&event, (TickType_t)portMAX_DELAY))
-        {
-            bzero(dtmp, BUF_SIZE);
-
-            ESP_LOGI(TAG, "[UART DATA]: %d", event.size);
-            uart_read_bytes(UART_PORT_2, dtmp, event.size, portMAX_DELAY);
-
-            // Tính toán CRC16 cho dữ liệu gốc
-            uint16_t crc_caculated = MODBUS_CRC16(dtmp, event.size - 2);
-            uint16_t crc_received = combine_Bytes(dtmp[event.size - 1], dtmp[event.size - 2]);
-            if (crc_caculated == crc_received)
-            {
-                // In chuỗi nhận được theo dạng hexa
-                printf("str RX: ");
-                for (int i = 0; i < event.size; i++)
-                {
-                    printf("%02X ", dtmp[i]);
-                }
-                printf("\n");
-                ESP_LOGI(TAG, "Slave address: %02X", dtmp[0]);
-                if (dtmp[1] == 0x03)
-                {
-                    ESP_LOGI(TAG, "Funtion: Read holding registers");
-                    ESP_LOGI(TAG, "Byte count: %d\n", dtmp[2]);
-                }
-                
-            }
-        }
-        vTaskDelay(pdMS_TO_TICKS(100));
-    }
-}
-
-char* read_holding_registers(uint8_t slave_addr)
-{
-    uint8_t tx_str[8];
-
-    tx_str[0] = slave_addr;
-    tx_str[1] = 0x03;
-    tx_str[2] = 0x5b;
-    tx_str[3] = 0x00;
-    tx_str[4] = 0x00;
-    tx_str[5] = 0x33;
-
-    // Tính CRC của chuỗi tx_str.
-    uint16_t crc = MODBUS_CRC16(tx_str, 6);
-
-    // Thêm CRC vào chuỗi tx_str.
-    tx_str[6] = crc & 0xFF;       // Byte thấp của CRC
-    tx_str[7] = (crc >> 8) & 0xFF;  // Byte cao của CRC
-
-    // Sao chép chuỗi tx_str vào một vùng nhớ mới.
-    char* new_tx_str = (char*)malloc(sizeof(tx_str) + 1);
-
-    if (new_tx_str == NULL) {
-        // Xử lý lỗi nếu không thể cấp phát bộ nhớ.
-        return NULL;
-    }
-
-    memcpy(new_tx_str, tx_str, sizeof(tx_str));
-    new_tx_str[sizeof(tx_str)] = '\0'; // Đặt ký tự null ở cuối chuỗi.
-
-    return new_tx_str;
-}
-
-
-uint16_t MODBUS_CRC16( uint8_t *buf, uint16_t len )
+static uint16_t MODBUS_CRC16( uint8_t *buf, uint16_t len )
 {
 	static const uint16_t table[256] = {
 	0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
@@ -196,6 +83,158 @@ uint16_t MODBUS_CRC16( uint8_t *buf, uint16_t len )
 	return crc;
 }
 
+void rs485_init()
+{
+    const int uart_num = UART_PORT_2;
+    uart_config_t uart_config =
+    {
+        .baud_rate = BAUD_RATE,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+        .rx_flow_ctrl_thresh = 122,
+        .source_clk = UART_SCLK_DEFAULT,
+    };
+
+    // Set UART log level
+    esp_log_level_set(TAG, ESP_LOG_INFO);
+
+    ESP_LOGI(TAG, "Start RS485 application and configure UART.");
+
+    ESP_ERROR_CHECK(uart_driver_install(uart_num, BUF_SIZE * 2, 0, 10, &uart_queue, 0));
+
+    // Configure UART parameters
+    ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
+
+    ESP_LOGI(TAG, "UART set pins, mode and install driver.");
+
+    // Set UART pins
+    ESP_ERROR_CHECK(uart_set_pin(uart_num, TX_PIN, RX_PIN, RTS_PIN, CTS_PIN));
+
+    // Set RS485 half duplex mode
+    ESP_ERROR_CHECK(uart_set_mode(uart_num, UART_MODE_RS485_HALF_DUPLEX));
+
+    // Set read timeout of UART TOUT feature
+    ESP_ERROR_CHECK(uart_set_rx_timeout(uart_num, RX_READ_TOUT));
+}
+
+void TX(const int port, const char* str, uint8_t length)
+{
+    if (uart_write_bytes(port, str, length) != length)
+    {
+        ESP_LOGE(TAG, "Send data critical failure.");
+        // add your code to handle sending failure here
+        abort();
+    }
+}
+
+data_3pha_t data_3pha;
+void RX_task(void *pvParameters)
+{
+    uart_event_t event;
+    uint8_t* dtmp = (uint8_t*) malloc(BUF_SIZE);
+    for(;;)
+    {
+        // Waiting for UART event.
+        if(xQueueReceive(uart_queue, (void * )&event, (TickType_t)portMAX_DELAY))
+        {
+            bzero(dtmp, BUF_SIZE);
+            uart_read_bytes(UART_PORT_2, dtmp, event.size, portMAX_DELAY);
+
+            // Tính toán CRC16 cho dữ liệu gốc
+            uint16_t crc_caculated = MODBUS_CRC16(dtmp, event.size - 2);
+            uint16_t crc_received = combine_2Bytes(dtmp[event.size - 1], dtmp[event.size - 2]);
+            if (crc_caculated == crc_received && (event.size > 10))
+            {
+                // In chuỗi nhận được theo dạng hexa
+                printf("str RX: ");
+                for (int i = 0; i < event.size; i++)
+                {
+                    printf("%02X ", dtmp[i]);
+                }
+                printf("\n");
+                ESP_LOGI(TAG, "Slave address: %02X", dtmp[0]);
+                if (dtmp[1] == 0x03)
+                {
+                    ESP_LOGI(TAG, "Funtion: Read holding registers");
+                    ESP_LOGI(TAG, "Byte count: %d", dtmp[2]);
+                    data_3pha.voltage3pha = combine_4Bytes(dtmp[3], dtmp[4], dtmp[5], dtmp[6]);
+                    data_3pha.voltageL1 = combine_4Bytes(dtmp[7], dtmp[8], dtmp[9], dtmp[10]);
+                    data_3pha.voltageL2 = combine_4Bytes(dtmp[11], dtmp[12], dtmp[13], dtmp[14]);
+                    data_3pha.voltageL3 = combine_4Bytes(dtmp[15], dtmp[16], dtmp[17], dtmp[18]);
+
+                    data_3pha.voltageL1L2 = combine_4Bytes(dtmp[19], dtmp[20], dtmp[21], dtmp[22]);
+                    data_3pha.voltageL3L2 = combine_4Bytes(dtmp[23], dtmp[24], dtmp[25], dtmp[26]);
+                    data_3pha.voltageL3L1 = combine_4Bytes(dtmp[27], dtmp[28], dtmp[29], dtmp[30]);
+
+                    data_3pha.current3pha = combine_4Bytes(dtmp[31], dtmp[32], dtmp[33], dtmp[34]);
+                    data_3pha.currentL1 = combine_4Bytes(dtmp[35], dtmp[36], dtmp[37], dtmp[38]);
+                    data_3pha.currentL2 = combine_4Bytes(dtmp[39], dtmp[40], dtmp[41], dtmp[42]);
+                    data_3pha.currentL3 = combine_4Bytes(dtmp[43], dtmp[44], dtmp[45], dtmp[46]);
+                    data_3pha.currentN = combine_4Bytes(dtmp[47], dtmp[48], dtmp[49], dtmp[50]);
+
+                    data_3pha.actpower3pha = combine_4Bytes(dtmp[51], dtmp[52], dtmp[53], dtmp[54]);
+                    data_3pha.actpowerL1 = combine_4Bytes(dtmp[55], dtmp[56], dtmp[57], dtmp[58]);
+                    data_3pha.actpowerL2 = combine_4Bytes(dtmp[59], dtmp[60], dtmp[61], dtmp[62]);
+                    data_3pha.actpowerL3 = combine_4Bytes(dtmp[63], dtmp[64], dtmp[65], dtmp[66]);
+
+                    data_3pha.ractpower3pha = combine_4Bytes(dtmp[67], dtmp[68], dtmp[69], dtmp[70]);
+                    data_3pha.ractpowerL1 = combine_4Bytes(dtmp[71], dtmp[72], dtmp[73], dtmp[74]);
+                    data_3pha.ractpowerL2 = combine_4Bytes(dtmp[75], dtmp[76], dtmp[77], dtmp[78]);
+                    data_3pha.ractpowerL3 = combine_4Bytes(dtmp[79], dtmp[80], dtmp[81], dtmp[82]);
+
+                    data_3pha.aprtpower3pha = combine_4Bytes(dtmp[83], dtmp[84], dtmp[85], dtmp[86]);
+                    data_3pha.aprtpowerL1 = combine_4Bytes(dtmp[87], dtmp[88], dtmp[89], dtmp[90]);
+                    data_3pha.aprtpowerL2 = combine_4Bytes(dtmp[91], dtmp[92], dtmp[93], dtmp[94]);
+                    data_3pha.aprtpowerL3 = combine_4Bytes(dtmp[95], dtmp[96], dtmp[97], dtmp[98]);
+
+                    data_3pha.Frequency = combine_2Bytes(dtmp[103], dtmp[104]);
+
+                    printf("phase_voltage_3pha: %08lX\n", data_3pha.voltage3pha);
+                    printf("phase_voltage_l1: %lu\n", data_3pha.voltageL1);
+                    printf("currentL1: %lu\n", data_3pha.currentL1);
+                    
+                    printf("frequency: %u\n", data_3pha.Frequency);
+
+                }
+            }
+        }
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+char* read_holding_registers(uint8_t slave_addr)
+{
+    uint8_t tx_str[8];
+
+    tx_str[0] = slave_addr;
+    tx_str[1] = 0x03;
+    tx_str[2] = 0x5b;
+    tx_str[3] = 0x00;
+    tx_str[4] = 0x00;
+    tx_str[5] = 0x33;
+
+    // Tính CRC của chuỗi tx_str.
+    uint16_t crc = MODBUS_CRC16(tx_str, 6);
+
+    // Thêm CRC vào chuỗi tx_str.
+    tx_str[6] = crc & 0xFF;       // Byte thấp của CRC
+    tx_str[7] = (crc >> 8) & 0xFF;  // Byte cao của CRC
+
+    // Sao chép chuỗi tx_str vào một vùng nhớ mới.
+    char* new_tx_str = (char*)malloc(sizeof(tx_str) + 1);
+
+    if (new_tx_str == NULL) {
+        // Xử lý lỗi nếu không thể cấp phát bộ nhớ.
+        return NULL;
+    }
+
+    memcpy(new_tx_str, tx_str, sizeof(tx_str));
+    new_tx_str[sizeof(tx_str)] = '\0'; // Đặt ký tự null ở cuối chuỗi.
+
+    return new_tx_str;
+}
 
 /****************************************************************************/
 /***        END OF FILE                                                   ***/

@@ -15,7 +15,6 @@ void TX_task(void *pvParameters)
     char* str_tx = read_holding_registers(0x01);
     for(;;)
     {
-
         if (str_tx != NULL)
         {
         printf("str TX: ");
@@ -25,7 +24,7 @@ void TX_task(void *pvParameters)
         }
         printf("\n");
         TX(2, str_tx, 8);
-        vTaskDelay(pdMS_TO_TICKS(5000));
+        vTaskDelay(pdMS_TO_TICKS(10000));
         }  
     }
 }
@@ -35,5 +34,5 @@ void app_main(void)
     rs485_init();
 
     xTaskCreate(RX_task, "RX_task", RX_TASK_STACK_SIZE * 2, NULL, RX_TASK_PRIO, NULL);
-    xTaskCreate(TX_task, "TX_task", 4096 * 2, NULL, 11, NULL);
+    //xTaskCreate(TX_task, "TX_task", 4096 * 2, NULL, 31, NULL);
 }
