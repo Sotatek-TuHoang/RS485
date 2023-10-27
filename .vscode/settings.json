@@ -11,6 +11,8 @@
     "queue.h": "c",
     "string_view": "c",
     "regex": "c",
-    "sstream": "c"
+    "sstream": "c",
+    "freertos.h": "c",
+    "stdlib.h": "c"
   }
 }

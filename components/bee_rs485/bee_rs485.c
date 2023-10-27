@@ -24,6 +24,11 @@
 
 static QueueHandle_t uart_queue;
 
+uint16_t combine_Bytes(uint8_t highByte, uint8_t lowByte)
+{
+    return ((uint16_t)highByte << 8) | lowByte;
+}
+
 void rs485_init()
 {
     const int uart_num = UART_PORT_2;
@@ -84,17 +89,19 @@ void RX_task(void *pvParameters)
             ESP_LOGI(TAG, "[UART DATA]: %d", event.size);
             uart_read_bytes(UART_PORT_2, dtmp, event.size, portMAX_DELAY);
 
-            // In chuỗi nhận được theo dạng hexa
-            printf("str RX: ");
-            for (int i = 0; i < event.size; i++)
-            {
-                printf("%02X ", dtmp[i]);
-            }
-            printf("\n");
-
             // Tính toán CRC16 cho dữ liệu gốc
             uint16_t crc_caculated = MODBUS_CRC16(dtmp, event.size - 2);
-            printf("Caculated crc: %02X\n", crc_caculated);
+            uint16_t crc_received = combine_Bytes(dtmp[event.size - 1], dtmp[event.size - 2]);
+            if (crc_caculated == crc_received)
+            {
+                // In chuỗi nhận được theo dạng hexa
+                printf("str RX: ");
+                for (int i = 0; i < event.size; i++)
+                {
+                    printf("%02X ", dtmp[i]);
+                }
+                printf("\n");
+            }
         }
         vTaskDelay(pdMS_TO_TICKS(100));
     }
