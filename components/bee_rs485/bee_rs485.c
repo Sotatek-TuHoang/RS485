@@ -24,6 +24,8 @@
 
 static QueueHandle_t uart_queue;
 
+data_3pha_t data_3pha;
+
 /****************************************************************************/
 /***        Local Functions                                               ***/
 /****************************************************************************/
@@ -87,6 +89,48 @@ static uint16_t MODBUS_CRC16( uint8_t *buf, uint16_t len )
 	return crc;
 }
 
+static void read_data_holding_registers(uint8_t *dtmp_buf)
+{
+    data_3pha.voltage3pha = combine_4Bytes(dtmp_buf[3], dtmp_buf[4], dtmp_buf[5], dtmp_buf[6]);
+    data_3pha.voltageL1 = combine_4Bytes(dtmp_buf[7], dtmp_buf[8], dtmp_buf[9], dtmp_buf[10]);
+    data_3pha.voltageL2 = combine_4Bytes(dtmp_buf[11], dtmp_buf[12], dtmp_buf[13], dtmp_buf[14]);
+    data_3pha.voltageL3 = combine_4Bytes(dtmp_buf[15], dtmp_buf[16], dtmp_buf[17], dtmp_buf[18]);
+
+    data_3pha.voltageL1L2 = combine_4Bytes(dtmp_buf[19], dtmp_buf[20], dtmp_buf[21], dtmp_buf[22]);
+    data_3pha.voltageL3L2 = combine_4Bytes(dtmp_buf[23], dtmp_buf[24], dtmp_buf[25], dtmp_buf[26]);
+    data_3pha.voltageL3L1 = combine_4Bytes(dtmp_buf[27], dtmp_buf[28], dtmp_buf[29], dtmp_buf[30]);
+
+    data_3pha.current3pha = combine_4Bytes(dtmp_buf[31], dtmp_buf[32], dtmp_buf[33], dtmp_buf[34]);
+    data_3pha.currentL1 = combine_4Bytes(dtmp_buf[35], dtmp_buf[36], dtmp_buf[37], dtmp_buf[38]);
+    data_3pha.currentL2 = combine_4Bytes(dtmp_buf[39], dtmp_buf[40], dtmp_buf[41], dtmp_buf[42]);
+    data_3pha.currentL3 = combine_4Bytes(dtmp_buf[43], dtmp_buf[44], dtmp_buf[45], dtmp_buf[46]);
+    data_3pha.currentN = combine_4Bytes(dtmp_buf[47], dtmp_buf[48], dtmp_buf[49], dtmp_buf[50]);
+
+    data_3pha.actpower3pha = combine_4Bytes(dtmp_buf[55], dtmp_buf[56], dtmp_buf[57], dtmp_buf[58]);
+    data_3pha.actpowerL1 = combine_4Bytes(dtmp_buf[59], dtmp_buf[60], dtmp_buf[61], dtmp_buf[62]);
+    data_3pha.actpowerL2 = combine_4Bytes(dtmp_buf[63], dtmp_buf[64], dtmp_buf[65], dtmp_buf[66]);
+    data_3pha.actpowerL3 = combine_4Bytes(dtmp_buf[67], dtmp_buf[68], dtmp_buf[69], dtmp_buf[70]);
+
+    data_3pha.ractpower3pha = combine_4Bytes(dtmp_buf[71], dtmp_buf[72], dtmp_buf[73], dtmp_buf[74]);
+    data_3pha.ractpowerL1 = combine_4Bytes(dtmp_buf[75], dtmp_buf[76], dtmp_buf[77], dtmp_buf[78]);
+    data_3pha.ractpowerL2 = combine_4Bytes(dtmp_buf[79], dtmp_buf[80], dtmp_buf[81], dtmp_buf[82]);
+    data_3pha.ractpowerL3 = combine_4Bytes(dtmp_buf[83], dtmp_buf[84], dtmp_buf[85], dtmp_buf[86]);
+
+    data_3pha.aprtpower3pha = combine_4Bytes(dtmp_buf[87], dtmp_buf[88], dtmp_buf[89], dtmp_buf[90]);
+    data_3pha.aprtpowerL1 = combine_4Bytes(dtmp_buf[91], dtmp_buf[92], dtmp_buf[93], dtmp_buf[94]);
+    data_3pha.aprtpowerL2 = combine_4Bytes(dtmp_buf[95], dtmp_buf[96], dtmp_buf[97], dtmp_buf[98]);
+    data_3pha.aprtpowerL3 = combine_4Bytes(dtmp_buf[99], dtmp_buf[100], dtmp_buf[101], dtmp_buf[102]);
+
+    data_3pha.Frequency = combine_2Bytes(dtmp_buf[103], dtmp_buf[104]);
+
+    printf("phase_voltage_3pha: %08lX\n", data_3pha.voltage3pha);
+    printf("phase_voltage_l1: %lu\n", data_3pha.voltageL1);
+    printf("currentL1: %lu\n", data_3pha.currentL1);
+    printf("aprtpowerL1: %lu\n", data_3pha.aprtpowerL1);
+    
+    printf("frequency: %u\n", data_3pha.Frequency);
+}
+
 /****************************************************************************/
 /***        Exported Functions                                            ***/
 /****************************************************************************/
@@ -137,7 +181,6 @@ void TX(const int port, const char* str, uint8_t length)
     }
 }
 
-data_3pha_t data_3pha;
 void RX_task(void *pvParameters)
 {
     uart_event_t event;
@@ -167,44 +210,7 @@ void RX_task(void *pvParameters)
                 {
                     ESP_LOGI(TAG, "Funtion: Read holding registers");
                     ESP_LOGI(TAG, "Byte count: %d", dtmp[2]);
-                    data_3pha.voltage3pha = combine_4Bytes(dtmp[3], dtmp[4], dtmp[5], dtmp[6]);
-                    data_3pha.voltageL1 = combine_4Bytes(dtmp[7], dtmp[8], dtmp[9], dtmp[10]);
-                    data_3pha.voltageL2 = combine_4Bytes(dtmp[11], dtmp[12], dtmp[13], dtmp[14]);
-                    data_3pha.voltageL3 = combine_4Bytes(dtmp[15], dtmp[16], dtmp[17], dtmp[18]);
-
-                    data_3pha.voltageL1L2 = combine_4Bytes(dtmp[19], dtmp[20], dtmp[21], dtmp[22]);
-                    data_3pha.voltageL3L2 = combine_4Bytes(dtmp[23], dtmp[24], dtmp[25], dtmp[26]);
-                    data_3pha.voltageL3L1 = combine_4Bytes(dtmp[27], dtmp[28], dtmp[29], dtmp[30]);
-
-                    data_3pha.current3pha = combine_4Bytes(dtmp[31], dtmp[32], dtmp[33], dtmp[34]);
-                    data_3pha.currentL1 = combine_4Bytes(dtmp[35], dtmp[36], dtmp[37], dtmp[38]);
-                    data_3pha.currentL2 = combine_4Bytes(dtmp[39], dtmp[40], dtmp[41], dtmp[42]);
-                    data_3pha.currentL3 = combine_4Bytes(dtmp[43], dtmp[44], dtmp[45], dtmp[46]);
-                    data_3pha.currentN = combine_4Bytes(dtmp[47], dtmp[48], dtmp[49], dtmp[50]);
-
-                    data_3pha.actpower3pha = combine_4Bytes(dtmp[55], dtmp[56], dtmp[57], dtmp[58]);
-                    data_3pha.actpowerL1 = combine_4Bytes(dtmp[59], dtmp[60], dtmp[61], dtmp[62]);
-                    data_3pha.actpowerL2 = combine_4Bytes(dtmp[63], dtmp[64], dtmp[65], dtmp[66]);
-                    data_3pha.actpowerL3 = combine_4Bytes(dtmp[67], dtmp[68], dtmp[69], dtmp[70]);
-
-                    data_3pha.ractpower3pha = combine_4Bytes(dtmp[71], dtmp[72], dtmp[73], dtmp[74]);
-                    data_3pha.ractpowerL1 = combine_4Bytes(dtmp[75], dtmp[76], dtmp[77], dtmp[78]);
-                    data_3pha.ractpowerL2 = combine_4Bytes(dtmp[79], dtmp[80], dtmp[81], dtmp[82]);
-                    data_3pha.ractpowerL3 = combine_4Bytes(dtmp[83], dtmp[84], dtmp[85], dtmp[86]);
-
-                    data_3pha.aprtpower3pha = combine_4Bytes(dtmp[87], dtmp[88], dtmp[89], dtmp[90]);
-                    data_3pha.aprtpowerL1 = combine_4Bytes(dtmp[91], dtmp[92], dtmp[93], dtmp[94]);
-                    data_3pha.aprtpowerL2 = combine_4Bytes(dtmp[95], dtmp[96], dtmp[97], dtmp[98]);
-                    data_3pha.aprtpowerL3 = combine_4Bytes(dtmp[99], dtmp[100], dtmp[101], dtmp[102]);
-
-                    data_3pha.Frequency = combine_2Bytes(dtmp[103], dtmp[104]);
-
-                    printf("phase_voltage_3pha: %08lX\n", data_3pha.voltage3pha);
-                    printf("phase_voltage_l1: %lu\n", data_3pha.voltageL1);
-                    printf("currentL1: %lu\n", data_3pha.currentL1);
-                    printf("aprtpowerL1: %lu\n", data_3pha.aprtpowerL1);
-                    
-                    printf("frequency: %u\n", data_3pha.Frequency);
+                    read_data_holding_registers(dtmp);
                 }
             }
         }
