@@ -101,6 +101,13 @@ void RX_task(void *pvParameters)
                     printf("%02X ", dtmp[i]);
                 }
                 printf("\n");
+                ESP_LOGI(TAG, "Slave address: %02X", dtmp[0]);
+                if (dtmp[1] == 0x03)
+                {
+                    ESP_LOGI(TAG, "Funtion: Read holding registers");
+                    ESP_LOGI(TAG, "Byte count: %d\n", dtmp[2]);
+                }
+                
             }
         }
         vTaskDelay(pdMS_TO_TICKS(100));
