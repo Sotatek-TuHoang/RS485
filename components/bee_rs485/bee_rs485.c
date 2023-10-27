@@ -24,6 +24,10 @@
 
 static QueueHandle_t uart_queue;
 
+/****************************************************************************/
+/***        Local Functions                                               ***/
+/****************************************************************************/
+
 static uint16_t combine_2Bytes(uint8_t highByte, uint8_t lowByte)
 {
     return ((uint16_t)highByte << 8) | lowByte;
@@ -68,7 +72,8 @@ static uint16_t MODBUS_CRC16( uint8_t *buf, uint16_t len )
 	0x8801, 0x48C0, 0x4980, 0x8941, 0x4B00, 0x8BC1, 0x8A81, 0x4A40,
 	0x4E00, 0x8EC1, 0x8F81, 0x4F40, 0x8D01, 0x4DC0, 0x4C80, 0x8C41,
 	0x4400, 0x84C1, 0x8581, 0x4540, 0x8701, 0x47C0, 0x4680, 0x8641,
-	0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040 };
+	0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040
+    };
 
 	uint8_t xor = 0;
 	uint16_t crc = 0xFFFF;
@@ -79,9 +84,12 @@ static uint16_t MODBUS_CRC16( uint8_t *buf, uint16_t len )
 		crc >>= 8;
 		crc ^= table[xor];
 	}
-
 	return crc;
 }
+
+/****************************************************************************/
+/***        Exported Functions                                            ***/
+/****************************************************************************/
 
 void rs485_init()
 {
@@ -194,9 +202,9 @@ void RX_task(void *pvParameters)
                     printf("phase_voltage_3pha: %08lX\n", data_3pha.voltage3pha);
                     printf("phase_voltage_l1: %lu\n", data_3pha.voltageL1);
                     printf("currentL1: %lu\n", data_3pha.currentL1);
+                    printf("aprtpowerL1: %lu\n", data_3pha.aprtpowerL1);
                     
                     printf("frequency: %u\n", data_3pha.Frequency);
-
                 }
             }
         }

@@ -10,6 +10,10 @@
 #ifndef BEE_RS485
 #define BEE_RS485
 
+/****************************************************************************/
+/***        Macro Definitions                                             ***/
+/****************************************************************************/
+
 #define TX_PIN   (17)
 #define RX_PIN   (16)
 
@@ -68,18 +72,61 @@ typedef struct
     uint32_t aprtpowerL1;
     uint32_t aprtpowerL2;
     uint32_t aprtpowerL3;
-    
+
     uint16_t Frequency;
 } data_3pha_t;
 
+/****************************************************************************/
+/***        Exported Functions                                            ***/
+/****************************************************************************/
+
+/**
+ * @brief Initialize RS485 communication.
+ *
+ * This function initializes the RS485 communication by configuring the UART
+ * interface, setting pins, and enabling the RS485 half-duplex mode.
+ *
+ */
 void rs485_init();
 
+/**
+ * @brief Receive and process data from RS485 communication.
+ *
+ * This task function handles receiving and processing data from RS485 communication.
+ * It waits for UART events, reads incoming data, performs CRC16 verification, and processes
+ * the received data to extract relevant information.
+ *
+ * @param[in] pvParameters Unused parameter for FreeRTOS task.
+ */
 void RX_task(void *pvParameters);
 
+/**
+ * @brief Transmit data over the UART communication.
+ *
+ * This function transmits data over the UART communication on the specified port.
+ *
+ * @param[in] port The UART port to use for transmission.
+ * @param[in] str The data to be transmitted as a character array.
+ * @param[in] length The length of the data to be transmitted.
+ *
+ * @note If the transmission fails, it logs an error and aborts the program.
+ */
 void TX(const int port, const char* str, uint8_t length);
 
+/**
+ * @brief Create a request to read holding registers for a Modbus device.
+ *
+ * This function constructs a Modbus request for reading holding registers, which includes
+ * the slave address, function code, starting register address, the number of registers to read,
+ * and CRC checksum.
+ *
+ * @param[in] slave_addr The slave address of the Modbus device.
+ *
+ * @return A dynamically allocated character array containing the Modbus request.
+ *         The caller is responsible for freeing the memory when done using it.
+ *         Returns NULL if memory allocation fails.
+ */
 char* read_holding_registers(uint8_t slave_addr);
-
 
 #endif
 
