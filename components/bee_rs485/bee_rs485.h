@@ -39,7 +39,7 @@
 
 void rs485_init();
 
-uint16_t MODBUS_CRC16( const unsigned char *buf, unsigned int len );
+uint16_t MODBUS_CRC16( uint8_t *buf, uint16_t len );
 
 void RX_task(void *pvParameters);
 

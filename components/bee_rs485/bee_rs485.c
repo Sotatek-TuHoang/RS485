@@ -68,7 +68,6 @@ void TX(const int port, const char* str, uint8_t length)
         // add your code to handle sending failure here
         abort();
     }
-    //free(new_tx_str);
 }
 
 void RX_task(void *pvParameters)
@@ -77,7 +76,7 @@ void RX_task(void *pvParameters)
     uint8_t* dtmp = (uint8_t*) malloc(BUF_SIZE);
     for(;;)
     {
-        //Waiting for UART event.
+        // Waiting for UART event.
         if(xQueueReceive(uart_queue, (void * )&event, (TickType_t)portMAX_DELAY))
         {
             bzero(dtmp, BUF_SIZE);
@@ -85,15 +84,17 @@ void RX_task(void *pvParameters)
             ESP_LOGI(TAG, "[UART DATA]: %d", event.size);
             uart_read_bytes(UART_PORT_2, dtmp, event.size, portMAX_DELAY);
 
-            printf("str RX: ");
-            
             // In chuỗi nhận được theo dạng hexa
+            printf("str RX: ");
             for (int i = 0; i < event.size; i++)
             {
                 printf("%02X ", dtmp[i]);
             }
             printf("\n");
 
+            // Tính toán CRC16 cho dữ liệu gốc
+            uint16_t crc_caculated = MODBUS_CRC16(dtmp, event.size - 2);
+            printf("Caculated crc: %02X\n", crc_caculated);
         }
         vTaskDelay(pdMS_TO_TICKS(100));
     }
@@ -132,7 +133,7 @@ char* read_holding_registers(uint8_t slave_addr)
 }
 
 
-uint16_t MODBUS_CRC16( const unsigned char *buf, unsigned int len )
+uint16_t MODBUS_CRC16( uint8_t *buf, uint16_t len )
 {
 	static const uint16_t table[256] = {
 	0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
