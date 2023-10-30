@@ -23,12 +23,21 @@ void TX_task(void *pvParameters)
             printf("%02X ", (unsigned char)str_tx[i]);
         }
         printf("\n");
-        char *json_str = pack_3pha_data();
         TX(2, str_tx, 8);
-        printf("str json: %s\n", json_str);
         vTaskDelay(pdMS_TO_TICKS(10000));
         }  
     }
+}
+
+void print_json_task(void *pvParameters)
+{
+    for(;;)
+    {
+        char *json_str = pack_3pha_data();
+        printf("str json: %s\n", json_str);
+        vTaskDelay(pdMS_TO_TICKS(10000));
+    }
+
 }
 
 void app_main(void)
@@ -37,4 +46,5 @@ void app_main(void)
 
     xTaskCreate(RX_task, "RX_task", RX_TASK_STACK_SIZE * 2, NULL, RX_TASK_PRIO, NULL);
     xTaskCreate(TX_task, "TX_task", 4096 * 2, NULL, 31, NULL);
+    xTaskCreate(print_json_task, "print_json_task", 2048, NULL, 10, NULL);
 }
