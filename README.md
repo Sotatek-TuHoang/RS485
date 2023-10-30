@@ -18,6 +18,7 @@ This is a module for RS485 communication in an embedded project. It includes fun
   - [Receiving Data](#receiving-data)
 - [Data Structures](#data-structures)
 - [Examples](#examples)
+- [Example Output](#example-output)
 
 ## Introduction
 
