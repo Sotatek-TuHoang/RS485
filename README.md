@@ -8,6 +8,18 @@
 
 This is a module for RS485 communication in an embedded project. It includes functions to read and write RS485 data and calculate CRC16 for Modbus communication.
 
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Requirements](#requirements)
+- [How to Use](#how-to-use)
+  - [Initialization](#initialization)
+  - [Sending Data](#sending-data)
+  - [Receiving Data](#receiving-data)
+- [Data Structures](#data-structures)
+- [Examples](#examples)
+- [License](#license)
+
 ## Introduction
 
 This module provides a set of functions to work with RS485 communication, particularly in the context of Modbus. It can be used to send and receive data, calculate CRC16, and handle Modbus frames.
