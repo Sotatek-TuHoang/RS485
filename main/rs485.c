@@ -35,6 +35,7 @@ void print_json_task(void *pvParameters)
     {
         char *json_str = pack_3pha_data();
         printf("str json: %s\n", json_str);
+        printf("strlen: %d\n", strlen(json_str));
         vTaskDelay(pdMS_TO_TICKS(10000));
     }
 

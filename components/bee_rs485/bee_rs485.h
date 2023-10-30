@@ -129,15 +129,13 @@ void TX(const int port, const char* str, uint8_t length);
 char* read_holding_registers(uint8_t slave_addr);
 
 /**
- * @brief Create a Modbus request to read holding registers.
+ * @brief Create a JSON representation of 3-phase data and associated metadata.
  *
- * This function constructs a Modbus request for reading holding registers, including
- * the slave address, function code, starting register address, the number of registers to read,
- * and CRC checksum.
+ * This function constructs a JSON object representing 3-phase data along with metadata
+ * such as a device token, command name, and object type. The function also increments a
+ * transaction code.
  *
- * @param[in] slave_addr The slave address of the Modbus device.
- *
- * @return A dynamically allocated character array containing the Modbus request.
+ * @return A dynamically allocated character array containing the JSON representation of 3-phase data.
  *         The caller is responsible for freeing the memory when done using it.
  *         Returns NULL if memory allocation fails.
  */
