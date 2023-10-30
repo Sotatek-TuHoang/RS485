@@ -50,7 +50,7 @@ typedef struct
 
     uint32_t voltageL1L2;
     uint32_t voltageL3L2;
-    uint32_t voltageL3L1;
+    uint32_t voltageL1L3;
 
     uint32_t current3pha;
     uint32_t currentL1;
@@ -127,6 +127,8 @@ void TX(const int port, const char* str, uint8_t length);
  *         Returns NULL if memory allocation fails.
  */
 char* read_holding_registers(uint8_t slave_addr);
+
+char* pack_3pha_data(void);
 
 #endif
 

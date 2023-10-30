@@ -13,6 +13,7 @@
     "regex": "c",
     "sstream": "c",
     "freertos.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "cjson.h": "c"
   }
 }

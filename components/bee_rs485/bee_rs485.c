@@ -17,6 +17,8 @@
 #include "freertos/queue.h"
 #include "esp_log.h"
 #include "sdkconfig.h"
+#include "cJSON.h"
+#include "esp_wifi.h"
 
 #include "bee_rs485.h"
 
@@ -98,7 +100,7 @@ static void read_data_holding_registers(uint8_t *dtmp_buf)
 
     data_3pha.voltageL1L2 = combine_4Bytes(dtmp_buf[19], dtmp_buf[20], dtmp_buf[21], dtmp_buf[22]);
     data_3pha.voltageL3L2 = combine_4Bytes(dtmp_buf[23], dtmp_buf[24], dtmp_buf[25], dtmp_buf[26]);
-    data_3pha.voltageL3L1 = combine_4Bytes(dtmp_buf[27], dtmp_buf[28], dtmp_buf[29], dtmp_buf[30]);
+    data_3pha.voltageL1L3 = combine_4Bytes(dtmp_buf[27], dtmp_buf[28], dtmp_buf[29], dtmp_buf[30]);
 
     data_3pha.current3pha = combine_4Bytes(dtmp_buf[31], dtmp_buf[32], dtmp_buf[33], dtmp_buf[34]);
     data_3pha.currentL1 = combine_4Bytes(dtmp_buf[35], dtmp_buf[36], dtmp_buf[37], dtmp_buf[38]);
@@ -248,6 +250,58 @@ char* read_holding_registers(uint8_t slave_addr)
     new_tx_str[sizeof(tx_str)] = '\0'; // Đặt ký tự null ở cuối chuỗi.
 
     return new_tx_str;
+}
+
+uint8_t trans_code = 0;
+char* pack_3pha_data(void)
+{
+    char mac_str[13];
+    uint8_t mac[6];
+    esp_wifi_get_mac(ESP_IF_WIFI_STA, mac);
+    snprintf(mac_str, sizeof(mac_str), "%02X%02X%02X%02X%02X%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+    cJSON *json_3pha_data = cJSON_CreateObject();
+    cJSON_AddStringToObject(json_3pha_data, "thing_token", mac_str);
+    cJSON_AddStringToObject(json_3pha_data, "cmd_name", "Bee.Nag_data");
+    cJSON_AddStringToObject(json_3pha_data, "object_type", "Bee.Nag_vrf");
+
+    cJSON *json_values = cJSON_AddObjectToObject(json_3pha_data, "values");
+    cJSON_AddNumberToObject(json_values, "voltage3pha", data_3pha.voltage3pha);
+    cJSON_AddNumberToObject(json_values, "voltageL1", data_3pha.voltageL1);
+    cJSON_AddNumberToObject(json_values, "voltageL2", data_3pha.voltageL2);
+    cJSON_AddNumberToObject(json_values, "voltageL3", data_3pha.voltageL3);
+
+    cJSON_AddNumberToObject(json_values, "voltageL1L2", data_3pha.voltageL1L2);
+    cJSON_AddNumberToObject(json_values, "voltageL3L2", data_3pha.voltageL3L2);
+    cJSON_AddNumberToObject(json_values, "voltageL1L3", data_3pha.voltageL1L3);
+
+    cJSON_AddNumberToObject(json_values, "current3pha", data_3pha.current3pha);
+    cJSON_AddNumberToObject(json_values, "currentL1", data_3pha.currentL1);
+    cJSON_AddNumberToObject(json_values, "currentL2", data_3pha.currentL2);
+    cJSON_AddNumberToObject(json_values, "currentL3", data_3pha.currentL3);
+    cJSON_AddNumberToObject(json_values, "currentN", data_3pha.currentN);
+
+    cJSON_AddNumberToObject(json_values, "actpower3pha", data_3pha.actpower3pha);
+    cJSON_AddNumberToObject(json_values, "actpowerL1", data_3pha.actpowerL1);
+    cJSON_AddNumberToObject(json_values, "actpowerL1", data_3pha.actpowerL2);
+    cJSON_AddNumberToObject(json_values, "actpowerL1", data_3pha.actpowerL3);
+
+    cJSON_AddNumberToObject(json_values, "ractpower3pha", data_3pha.ractpower3pha);
+    cJSON_AddNumberToObject(json_values, "ractpowerL1", data_3pha.ractpowerL1);
+    cJSON_AddNumberToObject(json_values, "ractpowerL2", data_3pha.ractpowerL2);
+    cJSON_AddNumberToObject(json_values, "ractpowerL3", data_3pha.ractpowerL3);
+
+    cJSON_AddNumberToObject(json_values, "aprtpower3pha", data_3pha.aprtpower3pha);
+    cJSON_AddNumberToObject(json_values, "aprtpowerL1", data_3pha.aprtpowerL1);
+    cJSON_AddNumberToObject(json_values, "aprtpowerL2", data_3pha.aprtpowerL2);
+    cJSON_AddNumberToObject(json_values, "aprtpowerL3", data_3pha.aprtpowerL3);
+    
+    cJSON_AddNumberToObject(json_values, "Frequency", data_3pha.Frequency);
+
+    cJSON_AddNumberToObject(json_3pha_data, "trans_code", trans_code++);
+
+    char *json_str = cJSON_Print(json_3pha_data);
+    return json_str;
 }
 
 /****************************************************************************/

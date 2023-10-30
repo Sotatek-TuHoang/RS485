@@ -23,7 +23,9 @@ void TX_task(void *pvParameters)
             printf("%02X ", (unsigned char)str_tx[i]);
         }
         printf("\n");
+        char *json_str = pack_3pha_data();
         TX(2, str_tx, 8);
+        printf("str json: %s\n", json_str);
         vTaskDelay(pdMS_TO_TICKS(10000));
         }  
     }
