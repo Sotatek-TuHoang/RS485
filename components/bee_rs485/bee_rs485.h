@@ -128,7 +128,19 @@ void TX(const int port, const char* str, uint8_t length);
  */
 char* read_holding_registers(uint8_t slave_addr);
 
-
+/**
+ * @brief Create a Modbus request to read holding registers.
+ *
+ * This function constructs a Modbus request for reading holding registers, including
+ * the slave address, function code, starting register address, the number of registers to read,
+ * and CRC checksum.
+ *
+ * @param[in] slave_addr The slave address of the Modbus device.
+ *
+ * @return A dynamically allocated character array containing the Modbus request.
+ *         The caller is responsible for freeing the memory when done using it.
+ *         Returns NULL if memory allocation fails.
+ */
 char* pack_3pha_data(void);
 
 #endif

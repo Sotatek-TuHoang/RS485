@@ -283,8 +283,8 @@ char* pack_3pha_data(void)
 
     cJSON_AddNumberToObject(json_values, "actpower3pha", data_3pha.actpower3pha);
     cJSON_AddNumberToObject(json_values, "actpowerL1", data_3pha.actpowerL1);
-    cJSON_AddNumberToObject(json_values, "actpowerL1", data_3pha.actpowerL2);
-    cJSON_AddNumberToObject(json_values, "actpowerL1", data_3pha.actpowerL3);
+    cJSON_AddNumberToObject(json_values, "actpowerL2", data_3pha.actpowerL2);
+    cJSON_AddNumberToObject(json_values, "actpowerL3", data_3pha.actpowerL3);
 
     cJSON_AddNumberToObject(json_values, "ractpower3pha", data_3pha.ractpower3pha);
     cJSON_AddNumberToObject(json_values, "ractpowerL1", data_3pha.ractpowerL1);
@@ -301,8 +301,13 @@ char* pack_3pha_data(void)
     cJSON_AddNumberToObject(json_3pha_data, "trans_code", trans_code++);
 
     char *json_str = cJSON_Print(json_3pha_data);
+
+    // Giải phóng bộ nhớ cho JSON object
+    cJSON_Delete(json_3pha_data);
+
     return json_str;
 }
+
 
 /****************************************************************************/
 /***        END OF FILE                                                   ***/
