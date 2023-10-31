@@ -23,7 +23,7 @@
 // CTS is not used in RS485 Half-Duplex Mode
 #define CTS_PIN   (UART_PIN_NO_CHANGE)
 
-#define BUF_SIZE        (4096)
+#define BUF_SIZE        (1024)
 #define BAUD_RATE       (9600)
 
 // Read packet timeout
@@ -58,20 +58,20 @@ typedef struct
     uint32_t currentL3;
     uint32_t currentN;
 
-    uint32_t actpower3pha;
-    uint32_t actpowerL1;
-    uint32_t actpowerL2;
-    uint32_t actpowerL3;
+    int32_t actpower3pha;
+    int32_t actpowerL1;
+    int32_t actpowerL2;
+    int32_t actpowerL3;
 
-    uint32_t ractpower3pha;
-    uint32_t ractpowerL1;
-    uint32_t ractpowerL2;
-    uint32_t ractpowerL3;
+    int32_t ractpower3pha;
+    int32_t ractpowerL1;
+    int32_t ractpowerL2;
+    int32_t ractpowerL3;
 
-    uint32_t aprtpower3pha;
-    uint32_t aprtpowerL1;
-    uint32_t aprtpowerL2;
-    uint32_t aprtpowerL3;
+    int32_t aprtpower3pha;
+    int32_t aprtpowerL1;
+    int32_t aprtpowerL2;
+    int32_t aprtpowerL3;
 
     uint16_t Frequency;
 } data_3pha_t;
@@ -139,7 +139,7 @@ char* read_holding_registers(uint8_t slave_addr);
  *         The caller is responsible for freeing the memory when done using it.
  *         Returns NULL if memory allocation fails.
  */
-char* pack_3pha_data(void);
+char* pack_json_3pha_data(void);
 
 #endif
 

@@ -24,7 +24,7 @@ void TX_task(void *pvParameters)
         }
         printf("\n");
         TX(2, str_tx, 8);
-        vTaskDelay(pdMS_TO_TICKS(10000));
+        vTaskDelay(pdMS_TO_TICKS(2000));
         }  
     }
 }
@@ -33,19 +33,17 @@ void print_json_task(void *pvParameters)
 {
     for(;;)
     {
-        char *json_str = pack_3pha_data();
+        char *json_str = pack_json_3pha_data();
         printf("str json: %s\n", json_str);
         printf("strlen: %d\n", strlen(json_str));
         vTaskDelay(pdMS_TO_TICKS(10000));
     }
-
 }
 
 void app_main(void)
 {
     rs485_init();
-
-    xTaskCreate(RX_task, "RX_task", RX_TASK_STACK_SIZE * 2, NULL, RX_TASK_PRIO, NULL);
+    xTaskCreatePinnedToCore(RX_task, "RX_task", RX_TASK_STACK_SIZE * 2, NULL, RX_TASK_PRIO, NULL, 1);
     xTaskCreate(TX_task, "TX_task", 4096 * 2, NULL, 31, NULL);
     xTaskCreate(print_json_task, "print_json_task", 2048, NULL, 10, NULL);
 }
