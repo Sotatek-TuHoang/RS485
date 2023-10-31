@@ -23,7 +23,7 @@
 // CTS is not used in RS485 Half-Duplex Mode
 #define CTS_PIN   (UART_PIN_NO_CHANGE)
 
-#define BUF_SIZE        (1024)
+#define BUF_SIZE        (256)
 #define BAUD_RATE       (9600)
 
 // Read packet timeout
