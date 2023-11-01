@@ -51,8 +51,12 @@ static uint32_t combine_4Bytes_unsingned(uint8_t highByte1, uint8_t lowByte1, ui
 }
 
 static int32_t combine_4Bytes_singned(int8_t highByte1, int8_t lowByte1, int8_t highByte2, int8_t lowByte2)
-{
+{ 
     int32_t result = ((int32_t)((int8_t)highByte1) << 24) | ((int8_t)lowByte1 << 16) | ((int8_t)highByte2 << 8) | lowByte2;
+    if (result == 0xffffffff)
+    {
+        return 0;
+    }
     return result;
 }
 
@@ -164,7 +168,7 @@ void rs485_init()
 
     ESP_LOGI(TAG, "Start RS485 application and configure UART.");
 
-    ESP_ERROR_CHECK(uart_driver_install(uart_num, BUF_SIZE * 2, 0, 10, &uart_queue, 0));
+    ESP_ERROR_CHECK(uart_driver_install(uart_num, BUF_SIZE * 2, 0, 0, NULL, 0));
 
     // Configure UART parameters
     ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_config));
@@ -197,20 +201,17 @@ void RX_task(void *pvParameters)
     uint8_t* dtmp = (uint8_t*) malloc(BUF_SIZE);
     for(;;)
     {
-        // Waiting for UART event.
-        if(xQueueReceive(uart_queue, (void * )&event, (TickType_t)portMAX_DELAY))
+        int len = uart_read_bytes(UART_PORT_2, dtmp, BUF_SIZE, PACKET_READ_TICS);
+        if (len > 0)
         {
-            bzero(dtmp, BUF_SIZE);
-            uart_read_bytes(UART_PORT_2, dtmp, event.size, portMAX_DELAY);
-
             // Tính toán CRC16 cho dữ liệu gốc
-            uint16_t crc_caculated = MODBUS_CRC16(dtmp, event.size - 2);
-            uint16_t crc_received = combine_2Bytes_unsigned(dtmp[event.size - 1], dtmp[event.size - 2]);
-            if (crc_caculated == crc_received && (event.size > 0))
+            uint16_t crc_caculated = MODBUS_CRC16(dtmp, len - 2);
+            uint16_t crc_received = combine_2Bytes_unsigned(dtmp[len - 1], dtmp[len - 2]);
+            if (crc_caculated == crc_received)
             {
                 // In chuỗi nhận được theo dạng hexa
                 printf("str RX: ");
-                for (int i = 0; i < event.size; i++)
+                for (int i = 0; i < len; i++)
                 {
                     printf("%02X ", dtmp[i]);
                 }
@@ -224,7 +225,10 @@ void RX_task(void *pvParameters)
                 }
             }
         }
-        vTaskDelay(pdMS_TO_TICKS(10));
+        else
+        {
+            ESP_ERROR_CHECK(uart_wait_tx_done(UART_PORT_2, 10));
+        }
     }
 }
 
@@ -260,6 +264,7 @@ char* read_holding_registers(uint8_t slave_addr)
     return new_tx_str;
 }
 
+#define TOPIC "123/ABC/MAC_ADDRESS/TEL"
 uint8_t trans_code = 0;
 char* pack_json_3pha_data(void)
 {
