@@ -26,6 +26,8 @@
 
 data_3pha_t data_3pha;
 
+bool check_data_flag = 0;
+
 /****************************************************************************/
 /***        Local Functions                                               ***/
 /****************************************************************************/
@@ -216,9 +218,12 @@ void RX_task(void *pvParameters)
                 ESP_LOGI(TAG, "Slave address: %02X", dtmp[0]);
                 if (dtmp[1] == 0x03)
                 {
+                    check_data_flag = 1;
                     ESP_LOGI(TAG, "Funtion: Read holding registers");
                     ESP_LOGI(TAG, "Byte count: %d", dtmp[2]);
                     read_data_holding_registers(dtmp);
+                    bzero(dtmp, BUF_SIZE);
+                    uart_flush(UART_PORT_2);
                 }
             }
         }
