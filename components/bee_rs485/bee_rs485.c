@@ -34,11 +34,19 @@ data_3pha_t data_3pha;
 
 static uint16_t combine_2Bytes_unsigned(uint8_t highByte, uint8_t lowByte)
 {
+    if (highByte == 0xff && lowByte == 0xff)
+    {
+        return 0;
+    }
     return ((uint16_t)highByte << 8) | lowByte;
 }
 
 static uint32_t combine_4Bytes_unsingned(uint8_t highByte1, uint8_t lowByte1, uint8_t highByte2, uint8_t lowByte2)
 {
+    if (highByte1 == 0xff && lowByte1 == 0xff && highByte2 == 0xff && lowByte2 == 0xff)
+    {
+        return 0;
+    } 
     return ((uint32_t)highByte1 << 24) | (lowByte1 << 16) | (highByte2 << 8) | lowByte2;
 }
 
