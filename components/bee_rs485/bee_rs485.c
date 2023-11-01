@@ -51,7 +51,7 @@ static uint32_t combine_4Bytes_unsingned(uint8_t highByte1, uint8_t lowByte1, ui
 static int32_t combine_4Bytes_singned(int8_t highByte1, int8_t lowByte1, int8_t highByte2, int8_t lowByte2)
 { 
     int32_t result = ((int32_t)((int8_t)highByte1) << 24) | ((int8_t)lowByte1 << 16) | ((int8_t)highByte2 << 8) | lowByte2;
-    if (result == 0xffffffff)
+    if (result == 0x7fffffff)
     {
         return 0;
     }
