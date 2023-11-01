@@ -222,7 +222,6 @@ void RX_task(void *pvParameters)
                     ESP_LOGI(TAG, "Funtion: Read holding registers");
                     ESP_LOGI(TAG, "Byte count: %d", dtmp[2]);
                     read_data_holding_registers(dtmp);
-                    bzero(dtmp, BUF_SIZE);
                     uart_flush(UART_PORT_2);
                 }
             }
