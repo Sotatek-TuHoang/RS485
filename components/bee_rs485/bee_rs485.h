@@ -35,8 +35,6 @@
 // Timeout threshold for UART = number of symbols (~10 tics) with unchanged state on receive pin
 #define RX_READ_TOUT          (3) // 3.5T * 8 = 28 ticks, TOUT=3 -> ~24..33 ticks
 
-#define CRC8_POLYNOMIAL 0x31
-
 #define ADDRESS_SLAVE_1 0X01
 #define ADDRESS_SLAVE_2 0X02
 #define ADDRESS_SLAVE_3 0X03
