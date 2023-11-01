@@ -48,10 +48,10 @@ static uint32_t combine_4Bytes_unsingned(uint8_t highByte1, uint8_t lowByte1, ui
     return ((uint32_t)highByte1 << 24) | (lowByte1 << 16) | (highByte2 << 8) | lowByte2;
 }
 
-static int32_t combine_4Bytes_singned(int8_t highByte1, int8_t lowByte1, int8_t highByte2, int8_t lowByte2)
+static int32_t combine_4Bytes_singned(uint8_t highByte1, uint8_t lowByte1, uint8_t highByte2, uint8_t lowByte2)
 { 
-    int32_t result = ((int32_t)((int8_t)highByte1) << 24) | ((int8_t)lowByte1 << 16) | ((int8_t)highByte2 << 8) | lowByte2;
-    if (result == 0x7fffffff)
+    int32_t result = ((int32_t)highByte1 << 24) | lowByte1 << 16 | highByte2 << 8 | lowByte2;
+    if (highByte1 == 0x7f && lowByte1 == 0xff && highByte2 == 0xff && lowByte2 == 0xff)
     {
         return 0;
     }
