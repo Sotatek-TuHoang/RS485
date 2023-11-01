@@ -11,9 +11,6 @@
 
 #include "bee_rs485.h"
 
-static const char *TAG = "uart_events";
-static QueueHandle_t uart0_queue;
-
 void TX_task(void *pvParameters)
 {        
     char* str_tx = read_holding_registers(0x01);

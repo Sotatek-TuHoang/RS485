@@ -24,8 +24,6 @@
 
 #define TAG "RS485"
 
-static QueueHandle_t uart_queue;
-
 data_3pha_t data_3pha;
 
 /****************************************************************************/
@@ -197,7 +195,6 @@ void TX(const int port, const char* str, uint8_t length)
 
 void RX_task(void *pvParameters)
 {
-    uart_event_t event;
     uint8_t* dtmp = (uint8_t*) malloc(BUF_SIZE);
     for(;;)
     {
