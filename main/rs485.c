@@ -7,9 +7,9 @@
 #include "driver/uart.h"
 #include "freertos/queue.h"
 #include "esp_log.h"
+#include "esp_mac.h"
 
 #include "bee_rs485.h"
-#include "esp_system.h"
 
 static const char *TAG = "uart_events";
 static QueueHandle_t uart0_queue;
@@ -34,7 +34,7 @@ void TX_task(void *pvParameters)
 }
 
 
-#if 0
+
 void print_json_task(void *pvParameters)
 {
     for(;;)
@@ -42,10 +42,9 @@ void print_json_task(void *pvParameters)
         char *json_str = pack_json_3pha_data();
         printf("str json: %s\n", json_str);
         printf("strlen: %d\n", strlen(json_str));
-        vTaskDelay(pdMS_TO_TICKS(10000));
+        vTaskDelay(pdMS_TO_TICKS(2000));
     }
 }
-#endif
 
 static void uart_event_task(void *pvParameters)
 {
@@ -69,7 +68,7 @@ static void uart_tx_task(void *pvParameters)
 {
     for(;;)
     {
-        uart_write_bytes(1, "hello", 6);
+        uart_write_bytes(1, "hello------------------------------------------------------------", 66);
         vTaskDelay(pdMS_TO_TICKS(2000));
     }
 }
@@ -79,7 +78,7 @@ void app_main(void)
     rs485_init();
     xTaskCreatePinnedToCore(RX_task, "RX_task", RX_TASK_STACK_SIZE * 2, NULL, RX_TASK_PRIO, NULL, 1);
     xTaskCreate(TX_task, "TX_task", 4096 * 2, NULL, 31, NULL);
-    //xTaskCreate(print_json_task, "print_json_task", 2048, NULL, 10, NULL);
+    xTaskCreate(print_json_task, "print_json_task", 4096, NULL, 5, NULL);
 
     esp_log_level_set(TAG, ESP_LOG_INFO);
 
@@ -100,9 +99,9 @@ void app_main(void)
     //Set UART log level
     esp_log_level_set(TAG, ESP_LOG_INFO);
     //Set UART pins (using UART0 default pins ie no changes.)
-    uart_set_pin(1, 26, 25, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    uart_set_pin(1, 17, 18, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 
     //Create a task to handler UART event from ISR
     xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, 12, NULL);
-    xTaskCreate(uart_tx_task, "uart_tx_task", 2048, NULL, 11, NULL);
+    xTaskCreatePinnedToCore(uart_tx_task, "uart_tx_task", 2048, NULL, 11, NULL, 1);
 }

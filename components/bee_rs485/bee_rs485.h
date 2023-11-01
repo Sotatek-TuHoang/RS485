@@ -14,11 +14,11 @@
 /***        Macro Definitions                                             ***/
 /****************************************************************************/
 
-#define TX_PIN   (17)
-#define RX_PIN   (16)
+#define TX_PIN   (5)
+#define RX_PIN   (6)
 
 // RTS for RS485 Half-Duplex Mode manages DE/~RE
-#define RTS_PIN   (18)
+#define RTS_PIN   (7)
 
 // CTS is not used in RS485 Half-Duplex Mode
 #define CTS_PIN   (UART_PIN_NO_CHANGE)

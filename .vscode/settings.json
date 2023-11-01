@@ -1,8 +1,8 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
-  "idf.portWin": "COM3",
+  "idf.portWin": "COM31",
   "idf.flashType": "UART",
-  "idf.adapterTargetName": "esp32",
+  "idf.adapterTargetName": "esp32s3",
   "files.associations": {
     "uart.h": "c",
     "esp_system.h": "c",
@@ -14,6 +14,11 @@
     "sstream": "c",
     "freertos.h": "c",
     "stdlib.h": "c",
-    "cjson.h": "c"
-  }
+    "cjson.h": "c",
+    "esp_wifi.h": "c",
+    "esp_mac.h": "c"
+  },
+  "idf.openOcdConfigs": [
+    "board/esp32s3-bridge.cfg"
+  ]
 }
