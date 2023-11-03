@@ -280,6 +280,17 @@ void RX_task(void *pvParameters)
                     ESP_LOGI(TAG, "Byte count: %d-----------Len: %d", dtmp[2], len);
                     read_data_holding_reg_ActiveEnergy_CO2(dtmp);                   
                 }
+                else
+                {
+                    //Slave gửi phản hồi nếu master gửi sai cú pháp lệnh
+                    printf("str RX: ");
+                    for (int i = 0; i < len; i++)
+                    {
+                        printf("%02X ", dtmp[i]);
+                    }
+                    printf("\n");
+                    ESP_LOGI(TAG, "Byte count: %d-----------Len: %d", dtmp[2], len);                    
+                }
                 uart_flush(UART_PORT_2);
             }
         }
