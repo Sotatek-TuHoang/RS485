@@ -57,7 +57,7 @@ static uint16_t combine_2Bytes_unsigned(uint8_t highByte, uint8_t lowByte)
 
 static int16_t combine_2Bytes_signed(uint8_t highByte, uint8_t lowByte)
 {
-    if (highByte == 0xff && lowByte == 0xff)
+    if (highByte == 0x7f && lowByte == 0xff)
     {
         return 0;
     }
