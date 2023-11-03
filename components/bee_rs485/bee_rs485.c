@@ -32,9 +32,6 @@ bool check_data_flag = 0;
 /***        Local Functions                                               ***/
 /****************************************************************************/
 
-#include <stdint.h>
-#include <stdlib.h>
-
 uint8_t* split_2byte(uint16_t bytes)
 {
     uint8_t* result = malloc(2 * sizeof(uint8_t));
@@ -267,7 +264,7 @@ void RX_task(void *pvParameters)
                         printf("%02X ", dtmp[i]);
                     }
                     printf("\n");
-                    ESP_LOGI(TAG, "Byte count: %d", dtmp[2]);
+                    ESP_LOGI(TAG, "Byte count: %d-----------Len: %d", dtmp[2], len);
                     read_data_holding_reg_ThreePhase_PowerFactors(dtmp);
 
                 }
@@ -280,7 +277,7 @@ void RX_task(void *pvParameters)
                         printf("%02X ", dtmp[i]);
                     }
                     printf("\n");
-                    ESP_LOGI(TAG, "Byte count: %d", dtmp[2]);
+                    ESP_LOGI(TAG, "Byte count: %d-----------Len: %d", dtmp[2], len);
                     read_data_holding_reg_ActiveEnergy_CO2(dtmp);                   
                 }
                 uart_flush(UART_PORT_2);
