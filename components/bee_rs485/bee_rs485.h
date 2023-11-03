@@ -27,7 +27,7 @@
 #define BAUD_RATE       (9600)
 
 // Read packet timeout
-#define PACKET_READ_TICS     (100 / portTICK_PERIOD_MS)
+#define PACKET_READ_TICS     (200 / portTICK_PERIOD_MS)
 #define RX_TASK_STACK_SIZE   (4096)
 #define RX_TASK_PRIO         (10)
 #define UART_PORT_2          (2)
@@ -72,6 +72,17 @@ typedef struct
     int32_t aprtpowerL3;
 
     uint16_t Frequency;
+
+    int16_t Powerfact3pha;
+    int16_t PowerfactL1;
+    int16_t PowerfactL2;
+    int16_t PowerfactL3;
+
+    uint64_t actenergy;
+    uint64_t ractenergy;
+    uint64_t aprtenergy;
+    uint64_t CO2factor;
+    uint64_t CURfactor;
 } data_3pha_t;
 
 /****************************************************************************/
@@ -119,12 +130,14 @@ void TX(const int port, const char* str, uint8_t length);
  * and CRC checksum.
  *
  * @param[in] slave_addr The slave address of the Modbus device.
+ * @param[in] reg_addr Start address.
+ * @param[in] num_reg No. of registers.
  *
  * @return A dynamically allocated character array containing the Modbus request.
  *         The caller is responsible for freeing the memory when done using it.
  *         Returns NULL if memory allocation fails.
  */
-char* read_holding_registers(uint8_t slave_addr);
+char* read_holding_registers(uint8_t slave_addr, uint16_t reg_addr, uint16_t num_reg );
 
 /**
  * @brief Create a JSON representation of 3-phase data and associated metadata.
