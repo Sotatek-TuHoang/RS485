@@ -240,6 +240,10 @@ void TX(const int port, const char* str, uint8_t length)
         // add your code to handle sending failure here
         abort();
     }
+    else
+    {
+        printf("send ok\n");
+    }
 }
 
 void RX_task(void *pvParameters)
@@ -267,7 +271,13 @@ void RX_task(void *pvParameters)
                 }
                 else
                 {
-                    //Slave gửi phản hồi nếu master gửi sai cú pháp lệnh                 
+                    printf("str RX: ");
+                    for (int i = 0; i < len; i++)
+                    {
+                        printf("%02X ", dtmp[i]);
+                    }
+                    printf("\n");
+                    ESP_LOGI(TAG, "Byte count: %d", dtmp[2]);                 
                 }
                 uart_flush(UART_PORT_2);
             }
@@ -297,7 +307,7 @@ void clear_energy_data(uint8_t slave_addr)
     tx_str[7] = (crc >> 8) & 0xFF;  // Byte cao của CRC
 
     // Sao chép chuỗi tx_str vào một vùng nhớ mới.
-    char* new_tx_str = (char*)malloc(sizeof(tx_str) + 1);
+    char* new_tx_str = (char*)malloc(sizeof(tx_str));
 
     if (new_tx_str == NULL)
     {
@@ -305,10 +315,17 @@ void clear_energy_data(uint8_t slave_addr)
     }
 
     memcpy(new_tx_str, tx_str, sizeof(tx_str));
-    new_tx_str[sizeof(tx_str)] = '\0'; // Đặt ký tự null ở cuối chuỗi.
 
-    TX(2, new_tx_str, strlen(new_tx_str));    
+    printf("str clear_energy_data: ");
+    for (int j = 0; j < 8; j++)
+    {
+        printf("%02X ", (unsigned char)new_tx_str[j]);
+    }
+    printf("\n");
+
+    TX(2, new_tx_str, 8);    
 }
+
 
 char* read_holding_registers(uint8_t slave_addr, uint16_t reg_addr, uint16_t num_reg )
 {
@@ -341,7 +358,6 @@ char* read_holding_registers(uint8_t slave_addr, uint16_t reg_addr, uint16_t num
     }
 
     memcpy(new_tx_str, tx_str, sizeof(tx_str));
-    new_tx_str[sizeof(tx_str)] = '\0'; // Đặt ký tự null ở cuối chuỗi.
 
     return new_tx_str;
 }

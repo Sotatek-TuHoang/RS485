@@ -20,6 +20,7 @@ void TX_task(void *pvParameters)
     {
         if (str_tx_1 != NULL && str_tx_2 != NULL)
         {
+            #if 0
             printf("str TX_1: ");
             for (int i = 0; i < 8; i++)
             {
@@ -33,10 +34,14 @@ void TX_task(void *pvParameters)
                 printf("%02X ", (unsigned char)str_tx_2[j]);
             }
             printf("\n");
+            
 
             TX(2, str_tx_1, 8);
             vTaskDelay(pdMS_TO_TICKS(400)); //phải có delay giữa 2Tx để tránh bị dính chuỗi
             TX(2, str_tx_2, 8);
+            vTaskDelay(pdMS_TO_TICKS(4000));
+            #endif
+            clear_energy_data(0x01);
             vTaskDelay(pdMS_TO_TICKS(4000));
         }  
     }
@@ -58,5 +63,6 @@ void app_main(void)
     rs485_init();
     xTaskCreate(RX_task, "RX_task", RX_TASK_STACK_SIZE, NULL, RX_TASK_PRIO, NULL);
     xTaskCreate(TX_task, "TX_task", 4096, NULL, 31, NULL);
-    xTaskCreate(print_json_task, "print_json_task", 4096, NULL, 5, NULL);
+    //xTaskCreate(print_json_task, "print_json_task", 4096, NULL, 5, NULL);
+    
 }
