@@ -39,6 +39,13 @@
 #define ADDRESS_SLAVE_2 0X02
 #define ADDRESS_SLAVE_3 0X03
 
+#define RESET_LOGS                      (uint8_t[]){ 0x8f, 0x57 }
+#define RESET_HISTORICAL_FUNCTIONALITY  (uint8_t[]){ 0x8f, 0x58 }
+#define RESET_TIMER                     (uint8_t[]){ 0x8f, 0x59 }
+#define RESET_ENERGY                    (uint8_t[]){ 0x8f, 0x5a }
+#define RESET_FACTORY                   (uint8_t[]){ 0x8f, 0x5b }
+#define RESET_MAX_MIN_AVR               (uint8_t[]){ 0x8f, 0x5c}
+
 typedef struct
 {
     uint32_t voltage3pha;
@@ -161,9 +168,9 @@ char* pack_json_3pha_data(void);
  * The resulting message is then copied to a new memory location, and a null terminator is added.
  *
  * @param slave_addr The Modbus RTU address of the slave device.
- *
+ * @param type_data The Modbus RTU type data to reset.
  */
-void clear_energy_data(uint8_t slave_addr);
+void reset_data(uint8_t slave_addr, const uint8_t* type_data);
 
 #endif
 

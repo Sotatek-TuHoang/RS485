@@ -41,7 +41,7 @@ void TX_task(void *pvParameters)
             TX(2, str_tx_2, 8);
             vTaskDelay(pdMS_TO_TICKS(4000));
             #endif
-            clear_energy_data(0x01);
+            reset_data(0x01, RESET_LOGS);
             vTaskDelay(pdMS_TO_TICKS(4000));
         }  
     }

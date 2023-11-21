@@ -289,13 +289,13 @@ void RX_task(void *pvParameters)
     }
 }
 
-void clear_energy_data(uint8_t slave_addr)
+void reset_data(uint8_t slave_addr, const uint8_t* type_data)
 {
     uint8_t tx_str[8];
     tx_str[0] = slave_addr;
     tx_str[1] = 0x06;
-    tx_str[2] = 0x8f;
-    tx_str[3] = 0x5a;
+    tx_str[2] = type_data[0];
+    tx_str[3] = type_data[1];
     tx_str[4] = 0x00;
     tx_str[5] = 0x01;
 
@@ -315,15 +315,8 @@ void clear_energy_data(uint8_t slave_addr)
     }
 
     memcpy(new_tx_str, tx_str, sizeof(tx_str));
-
-    printf("str clear_energy_data: ");
-    for (int j = 0; j < 8; j++)
-    {
-        printf("%02X ", (unsigned char)new_tx_str[j]);
-    }
-    printf("\n");
-
-    TX(2, new_tx_str, 8);    
+    TX(2, new_tx_str, 8);
+    free(new_tx_str);    
 }
 
 
