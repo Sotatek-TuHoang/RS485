@@ -258,38 +258,16 @@ void RX_task(void *pvParameters)
                 if ((dtmp[1] == 0x03) && (dtmp[2] == 0x88))
                 {
                     check_data_flag = 1;
-                    printf("str RX: ");
-                    for (int i = 0; i < len; i++)
-                    {
-                        printf("%02X ", dtmp[i]);
-                    }
-                    printf("\n");
-                    ESP_LOGI(TAG, "Byte count: %d-----------Len: %d", dtmp[2], len);
                     read_data_holding_reg_ThreePhase_PowerFactors(dtmp);
-
                 }
                 else if ((dtmp[1] == 0x03) && (dtmp[2] == 0x70))
                 {
                     check_data_flag = 1;
-                    printf("str RX: ");
-                    for (int i = 0; i < len; i++)
-                    {
-                        printf("%02X ", dtmp[i]);
-                    }
-                    printf("\n");
-                    ESP_LOGI(TAG, "Byte count: %d-----------Len: %d", dtmp[2], len);
                     read_data_holding_reg_ActiveEnergy_CO2(dtmp);                   
                 }
                 else
                 {
-                    //Slave gửi phản hồi nếu master gửi sai cú pháp lệnh
-                    printf("str RX: ");
-                    for (int i = 0; i < len; i++)
-                    {
-                        printf("%02X ", dtmp[i]);
-                    }
-                    printf("\n");
-                    ESP_LOGI(TAG, "Byte count: %d-----------Len: %d", dtmp[2], len);                    
+                    //Slave gửi phản hồi nếu master gửi sai cú pháp lệnh                 
                 }
                 uart_flush(UART_PORT_2);
             }
@@ -299,6 +277,42 @@ void RX_task(void *pvParameters)
             ESP_ERROR_CHECK(uart_wait_tx_done(UART_PORT_2, 10));
         }
     }
+}
+
+void clear_energy_data(uint8_t slave_addr)
+{
+    uint8_t tx_str[65];
+    tx_str[0] = slave_addr;
+    tx_str[1] = 0x10;
+    tx_str[2] = 0x50;
+    tx_str[3] = 0x00;
+    tx_str[4] = 0x00;
+    tx_str[5] = 0x0b;
+    tx_str[6] = 0x38;
+    for (uint8_t i = 7; i <= 62; ++i)
+    {
+        tx_str[i] = 0;
+    }
+
+    // Tính CRC của chuỗi tx_str.
+    uint16_t crc = MODBUS_CRC16(tx_str, 6);
+
+    // Thêm CRC vào chuỗi tx_str.
+    tx_str[63] = crc & 0xFF;       // Byte thấp của CRC
+    tx_str[64] = (crc >> 8) & 0xFF;  // Byte cao của CRC
+
+    // Sao chép chuỗi tx_str vào một vùng nhớ mới.
+    char* new_tx_str = (char*)malloc(sizeof(tx_str) + 1);
+
+    if (new_tx_str == NULL)
+    {
+        // Xử lý lỗi nếu không thể cấp phát bộ nhớ.
+    }
+
+    memcpy(new_tx_str, tx_str, sizeof(tx_str));
+    new_tx_str[sizeof(tx_str)] = '\0'; // Đặt ký tự null ở cuối chuỗi.
+
+    TX(2, new_tx_str, strlen(new_tx_str));    
 }
 
 char* read_holding_registers(uint8_t slave_addr, uint16_t reg_addr, uint16_t num_reg )
@@ -402,9 +416,11 @@ char* pack_json_3pha_data(void)
     cJSON_Delete(json_3pha_data);
 
     return json_str;
+    printf("json strlen: %d\n", strlen(json_str));
 }
 
 
 /****************************************************************************/
 /***        END OF FILE                                                   ***/
 /****************************************************************************/
+

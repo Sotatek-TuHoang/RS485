@@ -152,6 +152,19 @@ char* read_holding_registers(uint8_t slave_addr, uint16_t reg_addr, uint16_t num
  */
 char* pack_json_3pha_data(void);
 
+/**
+ * @brief Clears energy data for a specified slave device.
+ *
+ * This function constructs a Modbus RTU message to clear energy data for a slave device.
+ * The message includes the slave address, function code, and additional data.
+ * The CRC16 checksum is calculated and appended to the message.
+ * The resulting message is then copied to a new memory location, and a null terminator is added.
+ *
+ * @param slave_addr The Modbus RTU address of the slave device.
+ *
+ */
+void clear_energy_data(uint8_t slave_addr);
+
 #endif
 
 /****************************************************************************/

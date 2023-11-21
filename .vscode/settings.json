@@ -17,7 +17,12 @@
     "cjson.h": "c",
     "esp_wifi.h": "c",
     "esp_mac.h": "c",
-    "*.inc": "c"
+    "*.inc": "c",
+    "sdkconfig.h": "c",
+    "esp_log.h": "c",
+    "inttypes.h": "c",
+    "esp_rom_sys.h": "c",
+    "reset_reasons.h": "c"
   },
   "idf.openOcdConfigs": [
     "board/esp32-wrover-kit-3.3v.cfg"
