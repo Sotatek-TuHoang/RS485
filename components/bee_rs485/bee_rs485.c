@@ -281,25 +281,22 @@ void RX_task(void *pvParameters)
 
 void clear_energy_data(uint8_t slave_addr)
 {
-    uint8_t tx_str[65];
+    uint8_t tx_str[10];
     tx_str[0] = slave_addr;
     tx_str[1] = 0x10;
-    tx_str[2] = 0x50;
-    tx_str[3] = 0x00;
+    tx_str[2] = 0x8f;
+    tx_str[3] = 0x5a;
     tx_str[4] = 0x00;
-    tx_str[5] = 0x0b;
-    tx_str[6] = 0x38;
-    for (uint8_t i = 7; i <= 62; ++i)
-    {
-        tx_str[i] = 0;
-    }
+    tx_str[5] = 0x01;
+    tx_str[6] = 0x01;
+    tx_str[7] = 0x01;
 
     // Tính CRC của chuỗi tx_str.
     uint16_t crc = MODBUS_CRC16(tx_str, 6);
 
     // Thêm CRC vào chuỗi tx_str.
-    tx_str[63] = crc & 0xFF;       // Byte thấp của CRC
-    tx_str[64] = (crc >> 8) & 0xFF;  // Byte cao của CRC
+    tx_str[8] = crc & 0xFF;       // Byte thấp của CRC
+    tx_str[9] = (crc >> 8) & 0xFF;  // Byte cao của CRC
 
     // Sao chép chuỗi tx_str vào một vùng nhớ mới.
     char* new_tx_str = (char*)malloc(sizeof(tx_str) + 1);
